@@ -17,6 +17,7 @@ public class CoinCollector extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture background;//add image to the app or any Visual image
 	Texture [] man;
+	Texture dizzyFace;
 	int playerState=0;
 	float  gravity=0.2f;
 	float velocity =0;
@@ -55,6 +56,7 @@ public class CoinCollector extends ApplicationAdapter {
 
 		coin=new Texture("coin.png");
 		bomb=new Texture("bomb.png");
+		dizzyFace=new Texture("dizzy-1.png");
 
 		random=new Random();
 
@@ -79,62 +81,95 @@ public class CoinCollector extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(background,0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
-		//Bombs
-		if (bombCount <250){
-			bombCount++;
-		}else {
-			bombCount =0;
-			makeBomb();
-		}
-		//draw the Bombs
-		bombRectangles.clear();
-		for (int i=0;i<bombX.size();i++){
-			batch.draw(bomb,bombX.get(i),bombY.get(i));
-			//update the Bomb acts to say we want to move slowly to the left
-			bombX.set(i,bombX.get(i)-8);//move faster
-			bombRectangles.add(new Rectangle(bombX.get(i),bombY.get(i),bomb.getWidth(),bomb.getHeight()));
-		}
-
-		//Coins
-		if (coinCount <100){
-			coinCount++;
-		}else {
-			coinCount =0;
-			makeCoin();
-		}
-		//draw the Coins
-		coinRectangles.clear();//clear before the for
-		for (int i=0;i<coinX.size();i++){
-			batch.draw(coin,coinX.get(i),coinY.get(i));
-			//update the coin acts to say we want to move slowly to the left
-			coinX.set(i,coinX.get(i)-4);
-			coinRectangles.add(new Rectangle(coinX.get(i),coinY.get(i),coin.getWidth(),coin.getHeight()));
-		}
-
-		//Jump when touching the screen
-		if (Gdx.input.justTouched()){
-			velocity= -10;
-		}
-		//make the player rendering slower
-		if (pause<8){
-			pause++;
-		}else {
-			pause=0;
-			if (playerState<3){
-				playerState++;
-
+		if (gameState==1){               //game state ==1
+			//Game is On
+			//Bombs
+			if (bombCount <250){
+				bombCount++;
 			}else {
-				playerState=0;
+				bombCount =0;
+				makeBomb();
+			}
+			//draw the Bombs
+			bombRectangles.clear();
+			for (int i=0;i<bombX.size();i++){
+				batch.draw(bomb,bombX.get(i),bombY.get(i));
+				//update the Bomb acts to say we want to move slowly to the left
+				bombX.set(i,bombX.get(i)-8);//move faster
+				bombRectangles.add(new Rectangle(bombX.get(i),bombY.get(i),bomb.getWidth(),bomb.getHeight()));
+			}
+
+			//Coins
+			if (coinCount <100){
+				coinCount++;
+			}else {
+				coinCount =0;
+				makeCoin();
+			}
+			//draw the Coins
+			coinRectangles.clear();//clear before the for
+			for (int i=0;i<coinX.size();i++){
+				batch.draw(coin,coinX.get(i),coinY.get(i));
+				//update the coin acts to say we want to move slowly to the left
+				coinX.set(i,coinX.get(i)-4);
+				coinRectangles.add(new Rectangle(coinX.get(i),coinY.get(i),coin.getWidth(),coin.getHeight()));
+			}
+			//Jump when touching the screen
+			if (Gdx.input.justTouched()){
+				velocity= -10;
+			}
+			//make the player rendering slower
+			if (pause<8){
+				pause++;
+			}else {
+				pause=0;
+				if (playerState<3){
+					playerState++;
+
+				}else {
+					playerState=0;
+				}
+			}
+
+			velocity+=gravity;
+			manY-=velocity;
+			if (manY<=0){
+				manY=0;
+			}
+
+		}else if (gameState==0){
+			//Waiting to start
+			if (Gdx.input.justTouched()){
+				gameState=1;
+			}
+		}else if (gameState==2){
+			                                //Game Over
+			if (Gdx.input.justTouched()){
+				gameState=1;
+				manY=Gdx.graphics.getHeight()/ 2;
+				score=0;
+				velocity=0;
+				coinX.clear();
+				coinY.clear();
+				coinRectangles.clear();
+				coinCount=0;
+
+				bombRectangles.clear();
+				bombX.clear();
+				bombY.clear();
+				bombCount=0;
+
 			}
 		}
 
-		velocity+=gravity;
-		manY-=velocity;
-		if (manY<=0){
-			manY=0;
-		}
-		batch.draw(man[playerState],Gdx.graphics.getWidth()/2-man[playerState].getWidth()/2,manY);
+		if (gameState==2) {
+			//Draw the dizzy player
+			batch.draw(dizzyFace,Gdx.graphics.getWidth() / 2 - man[playerState].getWidth() / 2, manY);
+		}else {
+			// normal Mode draw from the start
+			batch.draw(man[playerState], Gdx.graphics.getWidth() / 2 - man[playerState].getWidth() / 2, manY);
 
+		}
 		manRectangle=new Rectangle(Gdx.graphics.getWidth()/2-man[playerState].getWidth()/2,manY,
 				man[playerState].getWidth(),man[playerState].getHeight());
 
@@ -152,7 +187,7 @@ public class CoinCollector extends ApplicationAdapter {
 		//check if the player is colliding with the Bombs
 		for (int i=0;i<bombRectangles.size();i++){
 			if (Intersector.overlaps(manRectangle,bombRectangles.get(i))){ //check the intersection between the player's rectangle and the coin Rectangle
-				Gdx.app.log("Bomb!!","COLLISSION!");
+				gameState=2;
 			}
 		}
 
