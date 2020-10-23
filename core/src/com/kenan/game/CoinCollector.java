@@ -79,6 +79,7 @@ public class CoinCollector extends ApplicationAdapter {
 	public void makeBomb(){
 		float height=random.nextFloat()*Gdx.graphics.getHeight();
 		bombY.add((int) height);
+
 		bombX.add(Gdx.graphics.getWidth());
 	}
 
