@@ -28,6 +28,7 @@ public class CoinCollector extends ApplicationAdapter {
 
 	int score=0;
 	BitmapFont font;
+	BitmapFont gameOverFont;
 
 	ArrayList<Integer> coinX=new ArrayList<>();
 	ArrayList<Integer> coinY=new ArrayList<>();
@@ -61,8 +62,13 @@ public class CoinCollector extends ApplicationAdapter {
 		random=new Random();
 
 		font=new BitmapFont();
-		font.setColor(Color.WHITE);
+		font.setColor(Color.GOLD);
 		font.getData().setScale(10);
+
+		gameOverFont=new BitmapFont();
+		gameOverFont.setColor(Color.RED);
+		gameOverFont.getData().setScale(9);
+
 	}
 	public void makeCoin(){
 		float height=random.nextFloat()*Gdx.graphics.getHeight();
@@ -165,6 +171,7 @@ public class CoinCollector extends ApplicationAdapter {
 		if (gameState==2) {
 			//Draw the dizzy player
 			batch.draw(dizzyFace,Gdx.graphics.getWidth() / 2 - man[playerState].getWidth() / 2, manY);
+			gameOverFont.draw(batch,"Game Over",250,250);
 		}else {
 			// normal Mode draw from the start
 			batch.draw(man[playerState], Gdx.graphics.getWidth() / 2 - man[playerState].getWidth() / 2, manY);
